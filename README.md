@@ -1,2 +1,5 @@
-# BroncoVotes
-Creating a university wide voting system using blockchain
+# BroncoVotes: Secure Voting System using Ethereum's Blockchain
+
+Description: *To-Do
+
+Usage: *To-Do
