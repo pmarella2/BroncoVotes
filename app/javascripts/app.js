@@ -30,7 +30,21 @@ var input1 = 1
 var input2 = 0
 var timestamp
 
+var votingAddress = "0xcc1a61cbae59fb96925d1b9d6f13b8e09314ae57"
+
 let candidates = {}
+
+window.loadBallot = function() {
+    let ballotID = $("#ballotid").val()
+
+    Register.deployed().then(function(contract) {
+        contract.getAddress.call(ballotID).then(function(v) {
+            $("#msg4").html("Setting up ballot...")
+            votingAddress = v.toString();
+            $("#ballotid").val("")
+        })
+    })
+}
 
 window.voteForCandidate = function(candidate) {
     let candidateName = $("#candidate").val()
@@ -48,7 +62,7 @@ window.voteForCandidate = function(candidate) {
                 throw new Error()
             }
 
-            Voting.deployed().then(function(contract) {
+            Voting.at(votingAddress).then(function(contract) {
                 contract.validCandidate.call(cHash).then(function(v) {
                     var candValid = v.toString()
 
@@ -56,31 +70,31 @@ window.voteForCandidate = function(candidate) {
                         $("#msg").html("Invalid Candidate!")
                         throw new Error()
                     }
-                        contract.checkVoteattempts.call().then(function(v) {
+                    contract.checkVoteattempts.call().then(function(v) {
 
-                            var attempCheck = v.toString()
+                        var attempCheck = v.toString()
 
-                            if (attempCheck == "false") {
-                                $("#msg").html("You have rechead your voting limit for this ballot/poll!")
-                                throw new Error()
+                        if (attempCheck == "false") {
+                            $("#msg").html("You have rechead your voting limit for this ballot/poll!")
+                            throw new Error()
+                        }
+                        $("#msg").html("Your vote attempt has been submitted. Please wait for verification.")
+                        $("#candidate").val("")
+                        $("#e-mail").val("")
+
+                        contract.candidateList.call(1234567890).then(function(candidateArray) {
+                            for (let i = 0; i < candidateArray.length; i++) {
+                                let hcand = (web3.toUtf8(candidateArray[i]))
+                                let hcHash = sha3withsize(hcand, 32)
+
+                                if (hcHash == cHash) {
+                                    encrypt(hcHash, input1, i, candidateArray, email)
+                                } else {
+                                    encrypt(hcHash, input2, i, candidateArray, email)
+                                }
                             }
-                                $("#msg").html("Your vote attempt has been submitted. Please wait for verification.")
-                                $("#candidate").val("")
-                                $("#e-mail").val("")
-
-                                contract.candidateList.call(1234567890).then(function(candidateArray) {
-                                    for (let i = 0; i < candidateArray.length; i++) {
-                                        let hcand = (web3.toUtf8(candidateArray[i]))
-                                        let hcHash = sha3withsize(hcand, 32)
-
-                                        if (hcHash == cHash) {
-                                            encrypt(hcHash, input1, i, candidateArray, email)
-                                        } else {
-                                            encrypt(hcHash, input2, i, candidateArray, email)
-                                        }
-                                    }
-                                })
                         })
+                    })
                 })
             })
         })
@@ -128,7 +142,7 @@ function decrypt(convVote, name) {
     })
 }
 
-function vgetTimestamp (eadd1, hcHash, i, candidateArray, email) {
+function vgetTimestamp(eadd1, hcHash, i, candidateArray, email) {
     $.ajax({
         type: "GET",
         url: "http://localhost:3000/getTime",
@@ -139,13 +153,12 @@ function vgetTimestamp (eadd1, hcHash, i, candidateArray, email) {
                     if (timecheck == "false") {
                         contract.getTimelimit.call().then(function(v) {
                             var endtime = v.toString()
-                            endtime = new Date(endtime*1000)
+                            endtime = new Date(endtime * 1000)
                             getVotes()
-                            $("#msg").html("Voting period for this ballot has ended on " +endtime)
+                            $("#msg").html("Voting period for this ballot has ended on " + endtime)
                             throw new Error()
                         })
-                    }
-                    else {
+                    } else {
                         vote(eadd1, hcHash, i, candidateArray, timestamp, email)
                     }
                 })
@@ -160,7 +173,7 @@ function vote(vote, hcHash, i, candidateArray, timestamp, email) {
             gas: 1200000,
             from: web3.eth.accounts[0]
         }).then(function() {
-            if (i == candidateArray.length-1) {
+            if (i == candidateArray.length - 1) {
                 getVotes()
                 $("#msg").html("")
                 window.alert("Your vote has been verified!")
@@ -211,17 +224,23 @@ window.registerToVote = function() {
 
 window.ballotSetup = function() {
     let date = $("#date").val()
-    let ballottype = $('input[name=ballottype]:checked').val()
-
-    var enddate = (Date.parse(date).getTime()/1000)
+    var enddate = (Date.parse(date).getTime() / 1000)
     enddate += 86340
-    cgetTimestamp(enddate)
+    let ballottype = $('input[name=ballottype]:checked').val()
+    let cemail = $("#cemail").val()
+    let title = $("#title").val()
+    let choices = $("#choices").val()
+    var choicesArray = choices.split(',');
+    let votelimit = $("#votelimit").val()
+    let whitelist = $('input[name=whitelist]:checked').val()
+    let whitelisted = $("#whitelisted").val()
+    var whitelistedArray = whitelisted.split(',');
 
-    var array = string.split(',');
+    cgetTimestamp(enddate)
 
 }
 
-function cgetTimestamp (enddate) {
+function cgetTimestamp(enddate) {
     $.ajax({
         type: "GET",
         url: "http://localhost:3000/getTime",
@@ -232,7 +251,7 @@ function cgetTimestamp (enddate) {
     })
 }
 
-function createBallot (timestamp, enddate) {
+function createBallot(timestamp, enddate) {
     //To-Do
 }
 
@@ -302,11 +321,10 @@ function getVotes() {
                         if (convVote == 0) {
                             contract.getTimelimit.call().then(function(v) {
                                 var endtime = v.toString()
-                                endtime = new Date(endtime*1000);
-                                $("#msg").html("Results will be displayed once the voting period has ended (" +endtime +")")
+                                endtime = new Date(endtime * 1000);
+                                $("#msg").html("Results will be displayed once the voting period has ended (" + endtime + ")")
                             })
-                        }
-                        else {
+                        } else {
                             convVote = scientificToDecimal(convVote)
                             decrypt(convVote, name)
                         }

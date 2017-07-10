@@ -4,11 +4,11 @@ contract Voting {
 
     struct Ballot {
         uint8 ballotType;
-        uint64 ballotId;
+        uint32 ballotId;
         uint8 voteLimit;
         uint32 timeLimit;
         string title;
-        uint8 whitelisted;
+        uint8 whitelist;
     }
 
     struct Candidates {
@@ -18,7 +18,7 @@ contract Voting {
     }
 
     struct Voter {
-        bytes32[] whitelist;
+        bytes32[] whitelisted;
         mapping (address => uint8) attemptedVotes;
     }
 
@@ -30,16 +30,19 @@ contract Voting {
     bytes32 tempCandidate;
     uint8 tempVote;
     bytes32 tempEmail;
+    address owner;
 
-    function Voting(bytes32[] candidateNames, uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint64 _ballotId, string _title, uint8 _whitelisted, bytes32[] _whitelist) {
+    function Voting(bytes32[] candidateNames, uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelist, bytes32[] _whitelisted) {
         c.candidateList = candidateNames;
         b.timeLimit = _timeLimit;
         b.ballotType = _ballotType;
         b.voteLimit = _voteLimit;
         b.ballotId = _ballotId;
         b.title = _title;
-        b.whitelisted = _whitelisted;
-        v.whitelist = _whitelist;
+        v.whitelisted = _whitelisted;
+        b.whitelist = _whitelist;
+
+        owner = msg.sender;
 
         tempVote = 1;
         for(uint i = 0; i < c.candidateList.length; i++) {
@@ -48,6 +51,11 @@ contract Voting {
             c.candidateHash[tempCandidate] = keccak256(convertCandidate);
             c.votesReceived[keccak256(convertCandidate)] = tempVote;
         }
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
     }
 
     function bytes32ToString(bytes32 x) constant returns (string) {
@@ -77,6 +85,14 @@ contract Voting {
     function votesFor(bytes32 cHash) constant returns (uint256){
         if (validCandidate(cHash) == false) throw;
         return c.votesReceived[cHash];
+    }
+
+    function setCandidates(bytes32 _candidate) onlyOwner {
+        c.candidateList.push(_candidate);
+    }
+
+    function setWhitelisted(bytes32 _email) onlyOwner {
+        v.whitelisted.push(_email);
     }
 
     function totalVotesFor(bytes32 cHash, uint32 _currentTime) constant returns (uint256){
@@ -123,13 +139,13 @@ contract Voting {
     }
 
     function checkWhitelist() constant returns (bool) {
-        if (b.whitelisted == 1) return true;
+        if (b.whitelist == 1) return true;
         else return false;
     }
 
     function checkifWhitelisted(bytes32 email) constant returns (bool) {
-        for(uint j = 0; j < v.whitelist.length; j++) {
-            tempEmail = v.whitelist[j];
+        for(uint j = 0; j < v.whitelisted.length; j++) {
+            tempEmail = v.whitelisted[j];
             if (tempEmail == email) {
                 return true;
             }

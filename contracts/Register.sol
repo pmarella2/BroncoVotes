@@ -10,7 +10,8 @@ contract Register {
     }
 
     struct Ballot {
-        mapping (uint64 => address) votingAddress;
+        mapping (uint32 => address) votingAddress;
+        mapping (address => uint32) ballotID;
         mapping (uint64 => uint8) whitelistCheck;
         mapping (bytes32 => uint8) allowedVoters;
 
@@ -54,8 +55,13 @@ contract Register {
         else return false;
     }
 
-    function getAddress(uint64 ballotID) constant returns (address) {
-        return b.votingAddress[ballotID];
+    function setAddress(address _ballotAddr, uint32 _ballotID) {
+        b.votingAddress[_ballotID] = _ballotAddr;
+        b.ballotID[_ballotAddr] = _ballotID;
+    }
+
+    function getAddress(uint32 _ballotID) constant returns (address) {
+        return b.votingAddress[_ballotID];
     }
 
     function getPermission(bytes32 email) constant returns (uint8) {
