@@ -27,6 +27,7 @@ contract Voting {
     Ballot b;
 
     string convertCandidate;
+    string tempTitle;
     bytes32 tempCandidate;
     uint8 tempVote;
     bytes32 tempEmail;
