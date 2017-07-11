@@ -21,7 +21,7 @@ contract Voting {
         bytes32[] whitelisted;
         mapping (address => uint8) attemptedVotes;
     }
-
+    
     Candidates c;
     Voter v;
     Ballot b;

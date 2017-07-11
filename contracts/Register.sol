@@ -66,5 +66,4 @@ contract Register {
     function getPermission(bytes32 email) constant returns (uint8) {
         return v.createPerm[email];
     }
-
 }
