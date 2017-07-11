@@ -60,6 +60,9 @@
         <input type="text" id="email" placeholder="Your e-mail address" style="width: 400px" />
         <br>
         <br>
+        <input type="radio" style="width: 25px" name="permreq" value="1"> <b>Request Ballot Creation Permission</b> <br>(You will be notified about ballot creation access at a later time)
+        <br>
+        <br>
         <a href="#" onclick="registerToVote()" class="btn btn-primary" style="background-color:rgb(255,90,0)">Register</a>
 
     </div>
@@ -79,13 +82,13 @@
             <br>
             <input type="radio" style="width: 25px" name="ballottype" value="0"> <b>Poll</b> (results are displayed live)
             <br>
-            <input type="radio" style="width: 25px" name="ballottype" value="1"> <b>Election</b> (results are displayed after enddate)
+            <input type="radio" style="width: 25px" name="ballottype" value="1"> <b>Election</b> (results are displayed after end date)
             <br>
             <br>
             <input type="text" id="title" placeholder="Title of your ballot" style="width: 400px" />
             <br>
             <br>
-            <b style="color:rgb(0,0,255)">Seperate each candidate/choice with a comma and capitalize the first letter:</b>
+            <b style="color:rgb(0,0,255)">Seperate each candidate/choice with a comma and no space after it: (ex: Morty Lao,Kenny Chang,Rick Piers) or (ex: Salt and pepper,BBQ,Lemon pepper)</b>
             <br>
             <input type="text" id="choices" placeholder="Candidates/Choices" style="width: 400px" />
             <br>
@@ -95,14 +98,14 @@
             <br>
             <b style="color:rgb(255,90,0)">Select voting type:</b>
             <br>
-            <input type="radio" style="width: 25px" name="whitelist" value="1"> <b>Whitelist</b> (only certain e-mails with whitelisted domain are allowed to vote)
-            <br>
             <input type="radio" style="width: 25px" name="whitelist" value="0"> <b>Non-Whitelist</b> (all e-mails with whitelisted domain are allowed to vote)
             <br>
+            <input type="radio" style="width: 25px" name="whitelist" value="1"> <b>Whitelist</b> (only certain e-mails with whitelisted domain are allowed to vote)
             <br>
-            <b style="color:rgb(0,0,255)">Seperate each whitelist e-mail address with a comma (if whitelist option was chosen):</b>
             <br>
-            <input type="text" id="whitelisted" placeholder="Whitelist e-mail addresses" style="width: 400px" />
+            <b style="color:rgb(0,0,255)">Seperate each e-mail address with a comma and no space after it: <br> (ex: sdf@boisestate.edu,ricky@u.boisestate.edu,manny@boisestate.edu)</b>
+            <br>
+            <input type="text" id="whitelisted" placeholder="Whitelisted e-mail addresses (if applicable)" style="width: 400px" />
             <br>
             <br>
             <form>

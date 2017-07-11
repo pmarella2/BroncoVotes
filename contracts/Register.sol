@@ -31,10 +31,10 @@ contract Register {
         _;
     }
 
-    function registerVoter(bytes32 email, uint16 idnum, bytes32 _domain) {
+    function registerVoter(bytes32 email, uint16 idnum, bytes32 _domain, uint8 _permreq) {
         if (domainCheck(_domain) == false) throw;
         v.voterID[email] = idnum;
-        v.createPerm[email] = 1;
+        v.createPerm[email] = _permreq;
     }
 
     function givePermission(bytes32 email) onlyOwner {

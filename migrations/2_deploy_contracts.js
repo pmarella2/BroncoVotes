@@ -3,7 +3,7 @@ var Register = artifacts.require("./Register.sol")
 var Creator = artifacts.require("./Creator.sol")
 
 module.exports = function(deployer) {
-    deployer.deploy(Voting, ['Morty', 'Kenny', 'Zoidberg', 'Rick', 'Mackey'], 1499573503, 1, 5, 1234567890, 'Testing Phase Ballot', 0, [], {
+    deployer.deploy(Voting, 1499573503, 1, 5, 1234567890, 'Testing Phase Ballot', 0, '0x1e376f3b3d7afba2a8ca5ff288e7f5d9585fdae8', {
         gas: 2100000
     });
     deployer.deploy(Register, ['boisestate.edu', 'u.boisestate.edu'], {

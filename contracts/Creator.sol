@@ -32,25 +32,15 @@ contract Voting {
     bytes32 tempEmail;
     address owner;
 
-    function Voting(bytes32[] candidateNames, uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelist, bytes32[] _whitelisted) {
-        c.candidateList = candidateNames;
+    function Voting(uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelist, address _owner) {
         b.timeLimit = _timeLimit;
         b.ballotType = _ballotType;
         b.voteLimit = _voteLimit;
         b.ballotId = _ballotId;
         b.title = _title;
-        v.whitelisted = _whitelisted;
         b.whitelist = _whitelist;
 
-        owner = msg.sender;
-
-        tempVote = 1;
-        for(uint i = 0; i < c.candidateList.length; i++) {
-            tempCandidate = c.candidateList[i];
-            convertCandidate = bytes32ToString(tempCandidate);
-            c.candidateHash[tempCandidate] = keccak256(convertCandidate);
-            c.votesReceived[keccak256(convertCandidate)] = tempVote;
-        }
+        owner = _owner;
     }
 
     modifier onlyOwner {
@@ -93,6 +83,16 @@ contract Voting {
 
     function setWhitelisted(bytes32 _email) onlyOwner {
         v.whitelisted.push(_email);
+    }
+
+    function setupCands() onlyOwner {
+        tempVote = 1;
+        for(uint i = 0; i < c.candidateList.length; i++) {
+            tempCandidate = c.candidateList[i];
+            convertCandidate = bytes32ToString(tempCandidate);
+            c.candidateHash[tempCandidate] = keccak256(convertCandidate);
+            c.votesReceived[keccak256(convertCandidate)] = tempVote;
+        }
     }
 
     function totalVotesFor(bytes32 cHash, uint32 _currentTime) constant returns (uint256){
@@ -168,9 +168,16 @@ contract Voting {
 
 contract Creator {
 
-    address deployedVoting;
-    function createBallot(bytes32[] candidateNames, uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelisted, bytes32[] _whitelist) returns (address){
-        deployedVoting = new Voting(candidateNames, _timeLimit, _ballotType, _voteLimit, _ballotId, _title, _whitelisted, _whitelist);
-        return deployedVoting;
+    mapping (uint32 => address) contracts;
+    address owner;
+
+    function createBallot(uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelisted) {
+        owner = msg.sender;
+        address newContract = new Voting(_timeLimit, _ballotType, _voteLimit, _ballotId, _title, _whitelisted, owner);
+        contracts[_ballotId] = newContract;
+    }
+
+    function getAddress(uint32 id) constant returns(address contractAddress) {
+        return contracts[id];
     }
 }
