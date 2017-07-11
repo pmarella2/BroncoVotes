@@ -67,14 +67,14 @@ contract Voting {
     }
 
     function voteForCandidate(uint256 eVote, bytes32 cHash, uint32 _currentTime, bytes32 _email) {
-        if (checkTimelimit(_currentTime) == false || checkVoteattempts() == false || validCandidate(cHash) == false) throw;
-        if (checkWhitelist() == true && checkifWhitelisted(_email) == false) throw;
+        if (checkTimelimit(_currentTime) == false || checkVoteattempts() == false || validCandidate(cHash) == false) revert();
+        if (checkWhitelist() == true && checkifWhitelisted(_email) == false) revert();
         v.attemptedVotes[msg.sender] += 1;
         c.votesReceived[cHash] = eVote;
     }
 
     function votesFor(bytes32 cHash) constant returns (uint256){
-        if (validCandidate(cHash) == false) throw;
+        if (validCandidate(cHash) == false) revert();
         return c.votesReceived[cHash];
     }
 
@@ -97,10 +97,8 @@ contract Voting {
     }
 
     function totalVotesFor(bytes32 cHash, uint32 _currentTime) constant returns (uint256){
-        if (checkBallottype() == false && checkTimelimit(_currentTime) == true) {
-            return 0;
-        }
-        if (validCandidate(cHash) == false) throw;
+        if (checkBallottype() == false && checkTimelimit(_currentTime) == true) return 0;
+        if (validCandidate(cHash) == false) revert();
         return c.votesReceived[cHash];
     }
 
@@ -115,7 +113,7 @@ contract Voting {
     }
 
     function candidateList(uint64 _ballotID) constant returns (bytes32[]) {
-        if (checkballotID(_ballotID) == false) throw;
+        if (checkballotID(_ballotID) == false) revert();
         return c.candidateList;
     }
 

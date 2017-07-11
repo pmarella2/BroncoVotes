@@ -14,7 +14,6 @@ contract Register {
         mapping (address => uint32) ballotID;
         mapping (uint64 => uint8) whitelistCheck;
         mapping (bytes32 => uint8) allowedVoters;
-
     }
 
     Voter v;
@@ -32,7 +31,7 @@ contract Register {
     }
 
     function registerVoter(bytes32 email, uint16 idnum, bytes32 _domain, uint8 _permreq) {
-        if (domainCheck(_domain) == false) throw;
+        if (domainCheck(_domain) == false) revert();
         v.voterID[email] = idnum;
         v.createPerm[email] = _permreq;
     }

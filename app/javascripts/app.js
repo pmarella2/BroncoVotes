@@ -74,46 +74,49 @@ window.voteForCandidate = function(candidate) {
                 var votingAddress = v.toString();
 
                 Voting.at(votingAddress).then(function(contract) {
-                    contract.checkifWhitelisted.call(email).then(function(v) {
-                        let wc = v.toString()
-                        if (wc == "false") {
-                            $("#msg").html("You're are not authorized to vote on this ballot!")
-                            throw new Error()
-                        } else {
-                            contract.validCandidate.call(cHash).then(function(v) {
-                                var candValid = v.toString()
+                    contract.checkWhitelist.call().then(function(v) {
+                        let wc1 = v.toString()
+                        contract.checkifWhitelisted.call(email).then(function(v) {
+                            let wc2 = v.toString()
+                            if (wc1 == "true" && wc2 == "false") {
+                                $("#msg").html("You're are not authorized to vote on this ballot!")
+                                throw new Error()
+                            } else {
+                                contract.validCandidate.call(cHash).then(function(v) {
+                                    var candValid = v.toString()
 
-                                if (candValid == "false") {
-                                    $("#msg").html("Invalid Candidate!")
-                                    throw new Error()
-                                }
-                                contract.checkVoteattempts.call().then(function(v) {
-
-                                    var attempCheck = v.toString()
-
-                                    if (attempCheck == "false") {
-                                        $("#msg").html("You have reached your voting limit for this ballot/poll!")
+                                    if (candValid == "false") {
+                                        $("#msg").html("Invalid Candidate!")
                                         throw new Error()
                                     }
-                                    $("#msg").html("Your vote attempt has been submitted. Please wait for verification.")
-                                    $("#candidate").val("")
-                                    $("#e-mail").val("")
+                                    contract.checkVoteattempts.call().then(function(v) {
 
-                                    contract.candidateList.call(ballotID).then(function(candidateArray) {
-                                        for (let i = 0; i < candidateArray.length; i++) {
-                                            let hcand = (web3.toUtf8(candidateArray[i]))
-                                            let hcHash = sha3withsize(hcand, 32)
+                                        var attempCheck = v.toString()
 
-                                            if (hcHash == cHash) {
-                                                encrypt(hcHash, input1, i, candidateArray, email, votingAddress)
-                                            } else {
-                                                encrypt(hcHash, input2, i, candidateArray, email, votingAddress)
-                                            }
+                                        if (attempCheck == "false") {
+                                            $("#msg").html("You have reached your voting limit for this ballot/poll!")
+                                            throw new Error()
                                         }
+                                        $("#msg").html("Your vote attempt has been submitted. Please wait for verification.")
+                                        $("#candidate").val("")
+                                        $("#e-mail").val("")
+
+                                        contract.candidateList.call(ballotID).then(function(candidateArray) {
+                                            for (let i = 0; i < candidateArray.length; i++) {
+                                                let hcand = (web3.toUtf8(candidateArray[i]))
+                                                let hcHash = sha3withsize(hcand, 32)
+
+                                                if (hcHash == cHash) {
+                                                    encrypt(hcHash, input1, i, candidateArray, email, votingAddress)
+                                                } else {
+                                                    encrypt(hcHash, input2, i, candidateArray, email, votingAddress)
+                                                }
+                                            }
+                                        })
                                     })
                                 })
-                            })
-                        }
+                            }
+                        })
                     })
                 })
             })
