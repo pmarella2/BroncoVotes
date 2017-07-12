@@ -52,6 +52,11 @@ contract Register {
         return false;
     }
 
+    function checkReg(bytes32 email) constant returns (bool) {
+        if (v.voterID[email] == 0) return true;
+        else return false;
+    }
+
     function checkVoter(bytes32 email, uint16 idnum) constant returns (uint8) {
         if (v.voterID[email] == 0) return 1;
         if (v.voterAddr[email] != msg.sender) return 2;

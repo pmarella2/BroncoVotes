@@ -64,7 +64,7 @@ window.voteForCandidate = function(candidate) {
 
     Register.deployed().then(function(contract) {
         contract.checkVoter(email, idnum, {
-            gas: 1200000,
+            gas: 2500000,
             from: web3.eth.accounts[0]
         }).then(function(v) {
             var voterCheck = v.toString()
@@ -203,7 +203,7 @@ function vgetTimestamp(eadd1, hcHash, i, candidateArray, email, votingAddress) {
 function vote(vote, hcHash, i, candidateArray, timestamp, email, votingAddress) {
     Voting.at(votingAddress).then(function(contract) {
         contract.voteForCandidate(vote, hcHash, timestamp, email, {
-            gas: 1200000,
+            gas: 2500000,
             from: web3.eth.accounts[0]
         }).then(function() {
             if (i == candidateArray.length - 1) {
@@ -236,7 +236,7 @@ window.registerToVote = function() {
                 throw new Error()
             }
 
-            contract.checkVoter.call(email).then(function(v) {
+            contract.checkReg.call(email).then(function(v) {
                 var emailValid = v.toString()
 
                 if (emailValid == "false") {
@@ -248,7 +248,7 @@ window.registerToVote = function() {
                 $("#email").val("")
 
                 contract.registerVoter(email, idNumber, domain, permreq, {
-                    gas: 1200000,
+                    gas: 2500000,
                     from: web3.eth.accounts[0]
                 }).then(function() {
                     $("#msg2").html("Account ready to vote!")
