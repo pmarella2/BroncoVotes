@@ -41,7 +41,8 @@ window.loadBallot = function() {
         contract.getAddress.call(ballotID).then(function(v) {
             var votingAddress = v.toString();
             if (votingAddress == 0) {
-                $("#msg4").html("Invalid ballot ID!")
+                window.alert("Invalid ballot ID!")
+                //$("#msg4").html("Invalid ballot ID!")
                 throw new Error()
             } else {
                 $("#msg4").html("Setting up ballot...")
@@ -55,7 +56,6 @@ window.loadBallot = function() {
 window.voteForCandidate = function(candidate) {
     let candidateName = $("#candidate").val()
     let email = $("#e-mail").val()
-    let idnum = $("#vidnum").val()
     $("#msg2").html("")
     $("#msg4").html("")
 
@@ -63,20 +63,19 @@ window.voteForCandidate = function(candidate) {
     var cHash = sha3withsize(candidateName, 32)
 
     Register.deployed().then(function(contract) {
-        contract.checkVoter(email, idnum, {
+        contract.checkVoter(email, {
             gas: 2500000,
             from: web3.eth.accounts[0]
         }).then(function(v) {
             var voterCheck = v.toString()
 
             if (voterCheck == 1) {
-                $("#msg").html("E-mail address not registered!")
+                window.alert("E-mail address not registered!")
+                //$("#msg").html("E-mail address not registered!")
                 throw new Error()
             } else if (voterCheck == 2) {
-                $("#msg").html("E-mail address and Ethereum address mismatch!")
-                throw new Error()
-            } else if (voterCheck == 3) {
-                $("#msg").html("E-mail address and BSU ID mismatch!")
+                window.alert("E-mail address and Ethereum address mismatch!")
+                //$("#msg").html("E-mail address and Ethereum address mismatch!")
                 throw new Error()
             }
 
@@ -89,14 +88,16 @@ window.voteForCandidate = function(candidate) {
                         contract.checkifWhitelisted.call(email).then(function(v) {
                             let wc2 = v.toString()
                             if (wc1 == "true" && wc2 == "false") {
-                                $("#msg").html("You're are not authorized to vote on this ballot!")
+                                window.alert("You're are not authorized to vote on this ballot!")
+                                //$("#msg").html("You're are not authorized to vote on this ballot!")
                                 throw new Error()
                             } else {
                                 contract.validCandidate.call(cHash).then(function(v) {
                                     var candValid = v.toString()
 
                                     if (candValid == "false") {
-                                        $("#msg").html("Invalid Candidate!")
+                                        window.alert("Invalid Candidate!")
+                                        //$("#msg").html("Invalid Candidate!")
                                         throw new Error()
                                     }
                                     contract.checkVoteattempts.call().then(function(v) {
@@ -104,7 +105,8 @@ window.voteForCandidate = function(candidate) {
                                         var attempCheck = v.toString()
 
                                         if (attempCheck == "false") {
-                                            $("#msg").html("You have reached your voting limit for this ballot/poll!")
+                                            window.alert("You have reached your voting limit for this ballot/poll!")
+                                            //$("#msg").html("You have reached your voting limit for this ballot/poll!")
                                             throw new Error()
                                         }
                                         $("#msg").html("Your vote attempt has been submitted. Please wait for verification.")
@@ -188,7 +190,8 @@ function vgetTimestamp(eadd1, hcHash, i, candidateArray, email, votingAddress) {
                             var endtime = v.toString()
                             endtime = new Date(endtime * 1000)
                             getVotes()
-                            $("#msg").html("Voting period for this ballot has ended on " + endtime)
+                            window.alert("Voting period for this ballot has ended on " + endtime)
+                            //$("#msg").html("Voting period for this ballot has ended on " + endtime)
                             throw new Error()
                         })
                     } else {
@@ -232,7 +235,8 @@ window.registerToVote = function() {
             var domainValid = v.toString()
 
             if (domainValid == "false") {
-                $("#msg2").html("Invalid e-mail address!")
+                window.alert("Invalid e-mail address!")
+                //$("#msg2").html("Invalid e-mail address!")
                 throw new Error()
             }
 
@@ -240,7 +244,8 @@ window.registerToVote = function() {
                 var emailValid = v.toString()
 
                 if (emailValid == "false") {
-                    $("#msg2").html("E-mail already registered to vote!")
+                    window.alert("E-mail/ID Number already registered to vote!")
+                    //$("#msg2").html("E-mail already registered to vote!")
                     throw new Error()
                 }
 
@@ -251,7 +256,8 @@ window.registerToVote = function() {
                     gas: 2500000,
                     from: web3.eth.accounts[0]
                 }).then(function() {
-                    $("#msg2").html("Account ready to vote!")
+                    //$("#msg2").html("Account ready to vote!")
+                    window.alert("Account ready to vote!")
                 })
             })
         })
@@ -264,38 +270,54 @@ window.ballotSetup = function() {
     let cemail = $("#cemail").val()
 
     Register.deployed().then(function(contract) {
-        contract.getPermission.call(cemail).then(function(v) {
-            let emailCheck = v.toString()
-            if (emailCheck == 0) {
-                $("#msg3").html("You are not authorized to create ballots! Please contact admin to request authorization.")
+        contract.checkVoter.call(cemail).then(function(v) {
+            var voterCheck = v.toString()
+
+            if (voterCheck == 1) {
+                window.alert("E-mail address not registered!")
+                //$("#msg").html("E-mail address not registered!")
+                throw new Error()
+            } else if (voterCheck == 2) {
+                window.alert("E-mail address and Ethereum address mismatch!")
+                //$("#msg").html("E-mail address and Ethereum address mismatch!")
                 throw new Error()
             } else {
-                let date = $("#date").val()
-                var enddate = (Date.parse(date).getTime() / 1000)
-                enddate += 86340
-                let ballottype = $("input[name=ballottype]:checked").val()
-                let title = $("#vtitle").val()
-                let choices = $("#choices").val()
-                var choicesArray = choices.split(',')
-                let votelimit = $("#votelimit").val()
-                votelimit = votelimit * (choicesArray.length)
-                let whitelist = $("input[name=whitelist]:checked").val()
-                let whitelisted = $("#whitelisted").val()
-                var whitelistedArray = whitelisted.split(',')
-                let ballotid = Math.floor(Math.random() * 4294967295)
 
-                Creator.deployed().then(function(contract) {
-                    contract.createBallot(enddate, ballottype, votelimit, ballotid, title, whitelist, {
-                        gas: 2500000,
-                        from: web3.eth.accounts[0]
-                    }).then(function() {
-                        contract.getAddress.call(ballotid).then(function(v) {
-                            var votingAddress = v.toString()
-                            //window.alert(votingAddress)
-                            fillSetup(votingAddress, choicesArray, whitelistedArray, whitelist, ballotid)
-                            registerBallot(votingAddress, ballotid)
+                contract.getPermission.call(cemail).then(function(v) {
+                    let emailCheck = v.toString()
+                    if (emailCheck == 0) {
+                        //$("#msg3").html("You are not authorized to create ballots! Please contact admin to request authorization.")
+                        window.alert("You are not authorized to create ballots! Please contact admin to request authorization.")
+                        throw new Error()
+                    } else {
+                        let date = $("#date").val()
+                        var enddate = (Date.parse(date).getTime() / 1000)
+                        enddate += 86340
+                        let ballottype = $("input[name=ballottype]:checked").val()
+                        let title = $("#vtitle").val()
+                        let choices = $("#choices").val()
+                        var choicesArray = choices.split(',')
+                        let votelimit = $("#votelimit").val()
+                        votelimit = votelimit * (choicesArray.length)
+                        let whitelist = $("input[name=whitelist]:checked").val()
+                        let whitelisted = $("#whitelisted").val()
+                        var whitelistedArray = whitelisted.split(',')
+                        let ballotid = Math.floor(Math.random() * 4294967295)
+
+                        Creator.deployed().then(function(contract) {
+                            contract.createBallot(enddate, ballottype, votelimit, ballotid, title, whitelist, {
+                                gas: 2500000,
+                                from: web3.eth.accounts[0]
+                            }).then(function() {
+                                contract.getAddress.call(ballotid).then(function(v) {
+                                    var votingAddress = v.toString()
+                                    //window.alert(votingAddress)
+                                    fillSetup(votingAddress, choicesArray, whitelistedArray, whitelist, ballotid)
+                                    registerBallot(votingAddress, ballotid)
+                                })
+                            })
                         })
-                    })
+                    }
                 })
             }
         })
@@ -434,7 +456,8 @@ function getVotes(votingAddress) {
                             contract.getTimelimit.call().then(function(v) {
                                 var endtime = v.toString()
                                 endtime = new Date(endtime * 1000);
-                                $("#msg").html("Results will be displayed once the voting period has ended (" + endtime + ")")
+                                //$("#msg").html("Results will be displayed once the voting period has ended (" + endtime + ")")
+                                window.alert("Results will be displayed once the voting period has ended (" + endtime + ")")
                             })
                         } else {
                             convVote = scientificToDecimal(convVote)
