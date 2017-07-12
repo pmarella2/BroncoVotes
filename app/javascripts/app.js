@@ -55,6 +55,7 @@ window.loadBallot = function() {
 window.voteForCandidate = function(candidate) {
     let candidateName = $("#candidate").val()
     let email = $("#e-mail").val()
+    let idnum = $("#vidnum").val()
     $("#msg2").html("")
     $("#msg4").html("")
 
@@ -62,11 +63,20 @@ window.voteForCandidate = function(candidate) {
     var cHash = sha3withsize(candidateName, 32)
 
     Register.deployed().then(function(contract) {
-        contract.checkVoter.call(email).then(function(v) {
-            var emailCheck = v.toString()
+        contract.checkVoter(email, idnum, {
+            gas: 1200000,
+            from: web3.eth.accounts[0]
+        }).then(function(v) {
+            var voterCheck = v.toString()
 
-            if (emailCheck == "true") {
+            if (voterCheck == 1) {
                 $("#msg").html("E-mail address not registered!")
+                throw new Error()
+            } else if (voterCheck == 2) {
+                $("#msg").html("E-mail address and Ethereum address mismatch!")
+                throw new Error()
+            } else if (voterCheck == 3) {
+                $("#msg").html("E-mail address and BSU ID mismatch!")
                 throw new Error()
             }
 

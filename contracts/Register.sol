@@ -7,6 +7,7 @@ contract Register {
         mapping (bytes32 => address) voterAddr;
         mapping (bytes32 => uint8) createPerm;
         mapping (bytes32 => uint16) voterID;
+        mapping (uint16 => bytes32) voterEmail;
     }
 
     struct Ballot {
@@ -34,6 +35,8 @@ contract Register {
         if (domainCheck(_domain) == false) revert();
         v.voterID[email] = idnum;
         v.createPerm[email] = _permreq;
+        v.voterAddr[email] = msg.sender;
+        v.voterEmail[idnum] = email;
     }
 
     function givePermission(bytes32 email) onlyOwner {
@@ -49,9 +52,11 @@ contract Register {
         return false;
     }
 
-    function checkVoter(bytes32 email) constant returns (bool) {
-        if (v.voterID[email] == 0) return true;
-        else return false;
+    function checkVoter(bytes32 email, uint16 idnum) constant returns (uint8) {
+        if (v.voterID[email] == 0) return 1;
+        if (v.voterAddr[email] != msg.sender) return 2;
+        if (v.voterEmail[idnum] != email) return 3;
+        else return 0;
     }
 
     function setAddress(address _ballotAddr, uint32 _ballotID) {
@@ -63,7 +68,7 @@ contract Register {
         return b.votingAddress[_ballotID];
     }
 
-    function getPermission(bytes32 email) constant returns (uint8) {
-        return v.createPerm[email];
+    function getPermission(bytes32 _email) constant returns (uint8) {
+        return v.createPerm[_email];
     }
 }
