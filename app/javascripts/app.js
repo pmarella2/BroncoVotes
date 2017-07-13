@@ -220,6 +220,7 @@ function vote(vote, hcHash, i, candidateArray, timestamp, email, votingAddress) 
 
 
 window.registerToVote = function() {
+    var t0 = performance.now()
     let idNumber = $("#idnum").val()
     let email = $("#email").val()
     let permreq = $("input[name=permreq]:checked").val()
@@ -240,7 +241,7 @@ window.registerToVote = function() {
                 throw new Error()
             }
 
-            contract.checkReg.call(email).then(function(v) {
+            contract.checkReg.call(email, idNumber).then(function(v) {
                 var emailValid = v.toString()
 
                 if (emailValid == "false") {
@@ -258,6 +259,8 @@ window.registerToVote = function() {
                 }).then(function() {
                     //$("#msg2").html("Account ready to vote!")
                     window.alert("Account ready to vote!")
+                    var t1 = performance.now()
+                    window.alert('It took' +(t1-t0)+ 'ms to finish')
                 })
             })
         })
