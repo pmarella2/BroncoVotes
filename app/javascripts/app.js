@@ -34,6 +34,8 @@ var ballotID
 
 let candidates = {}
 
+//Set Web3 on page load
+
 $(document).ready(function() {
 
     /*var provider = new HookedWeb3Provider({
@@ -60,6 +62,10 @@ $(document).ready(function() {
 
 })
 
+//End page load setup
+
+//Load ballot using user input ballot ID
+
 window.loadBallot = function() {
     ballotID = $("#ballotid").val()
 
@@ -78,6 +84,10 @@ window.loadBallot = function() {
         })
     })
 }
+
+//End load ballot
+
+//Register voter using ballot id and e-mail address
 
 window.registerToVote = function() {
     var t0 = performance.now()
@@ -127,6 +137,10 @@ window.registerToVote = function() {
         $("#msg2").html("Registration attempt successful! Please wait for verification.")
     })
 }
+
+//End voter registration
+
+//Vote for user input choice
 
 window.voteForCandidate = function(candidate) {
     let candidateName = $("#candidate").val()
@@ -279,6 +293,10 @@ function vote(i, candidateArray, email, votingAddress, votesArray) {
     })
 }
 
+//End voting process
+
+//Start ballot creation process using user input data
+
 window.ballotSetup = function() {
     let cemail = $("#cemail").val()
 
@@ -382,6 +400,8 @@ function fillWhitelisted(votingAddress, whitelistedArray) {
         })
     })
 }
+
+//End ballot creation process
 
 function getCandidates(votingAddress, ballotID) {
     Voting.at(votingAddress).then(function(contract) {
