@@ -29,7 +29,10 @@ contract Voting {
     string convertCandidate;
     string tempTitle;
     bytes32 tempCandidate;
-    uint8 tempVote;
+    uint256 tempVote;
+    bytes32 tempHash;
+    uint256[] tempVotes;
+    bytes32[] tempCandidates;
     bytes32 tempEmail;
     address owner;
 
@@ -49,6 +52,57 @@ contract Voting {
         _;
     }
 
+    function setCandidates(bytes32[] _candidates) onlyOwner {
+        for(uint i = 0; i < _candidates.length; i++) {
+            tempCandidate = _candidates[i];
+            c.candidateList.push(tempCandidate);
+        }
+    }
+
+    function setWhitelisted(bytes32[] _emails) onlyOwner {
+        for(uint i = 0; i < _emails.length; i++) {
+            tempEmail = _emails[i];
+            v.whitelisted.push(tempEmail);
+        }
+    }
+
+    function hashCandidates() onlyOwner {
+        tempVote = 1;
+        for(uint i = 0; i < c.candidateList.length; i++) {
+            tempCandidate = c.candidateList[i];
+            convertCandidate = bytes32ToString(tempCandidate);
+            c.candidateHash[tempCandidate] = keccak256(convertCandidate);
+            c.votesReceived[keccak256(convertCandidate)] = tempVote;
+        }
+    }
+
+    function voteForCandidate(uint256[] _votes, bytes32 _email, bytes32[] _candidates) {
+        if (checkTimelimit() == false || checkVoteattempts() == false) revert();
+        if (checkWhitelist() == true && checkifWhitelisted(_email) == false) revert();
+        tempVotes = _votes;
+        tempCandidates = _candidates;
+        v.attemptedVotes[msg.sender] += 1;
+
+        for(uint i = 0; i < tempCandidates.length; i++) {
+            tempCandidate = tempCandidates[i];
+            tempHash = c.candidateHash[tempCandidate];
+            if (validCandidate(tempHash) == false) revert();
+            tempVote = tempVotes[i];
+            c.votesReceived[tempHash] = tempVote;
+        }
+    }
+
+    function votesFor(bytes32 cHash) constant returns (uint256){
+        if (validCandidate(cHash) == false) revert();
+        return c.votesReceived[cHash];
+    }
+
+    function totalVotesFor(bytes32 cHash) constant returns (uint256){
+        if (checkBallottype() == false && checkTimelimit() == true) return 0;
+        if (validCandidate(cHash) == false) revert();
+        return c.votesReceived[cHash];
+    }
+
     function bytes32ToString(bytes32 x) constant returns (string) {
         bytes memory bytesString = new bytes(32);
         uint charCount = 0;
@@ -66,42 +120,6 @@ contract Voting {
         return string(bytesStringTrimmed);
     }
 
-    function voteForCandidate(uint256 eVote, bytes32 cHash, uint32 _currentTime, bytes32 _email) {
-        if (checkTimelimit(_currentTime) == false || checkVoteattempts() == false || validCandidate(cHash) == false) revert();
-        if (checkWhitelist() == true && checkifWhitelisted(_email) == false) revert();
-        v.attemptedVotes[msg.sender] += 1;
-        c.votesReceived[cHash] = eVote;
-    }
-
-    function votesFor(bytes32 cHash) constant returns (uint256){
-        if (validCandidate(cHash) == false) revert();
-        return c.votesReceived[cHash];
-    }
-
-    function setCandidates(bytes32 _candidate) onlyOwner {
-        c.candidateList.push(_candidate);
-    }
-
-    function setWhitelisted(bytes32 _email) onlyOwner {
-        v.whitelisted.push(_email);
-    }
-
-    function setupCands() onlyOwner {
-        tempVote = 1;
-        for(uint i = 0; i < c.candidateList.length; i++) {
-            tempCandidate = c.candidateList[i];
-            convertCandidate = bytes32ToString(tempCandidate);
-            c.candidateHash[tempCandidate] = keccak256(convertCandidate);
-            c.votesReceived[keccak256(convertCandidate)] = tempVote;
-        }
-    }
-
-    function totalVotesFor(bytes32 cHash, uint32 _currentTime) constant returns (uint256){
-        if (checkBallottype() == false && checkTimelimit(_currentTime) == true) return 0;
-        if (validCandidate(cHash) == false) revert();
-        return c.votesReceived[cHash];
-    }
-
     function validCandidate(bytes32 cHash) constant returns (bool) {
         for(uint k = 0; k < c.candidateList.length; k++) {
             tempCandidate = c.candidateList[k];
@@ -117,8 +135,8 @@ contract Voting {
         return c.candidateList;
     }
 
-    function checkTimelimit(uint32 currentTime) constant returns (bool) {
-        if (currentTime >= b.timeLimit) return false;
+    function checkTimelimit() constant returns (bool) {
+        if (block.timestamp >= b.timeLimit) return false;
         else return true;
     }
 
