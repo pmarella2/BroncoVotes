@@ -1,6 +1,6 @@
 pragma solidity ^0.4.10;
 
-contract Register {
+contract Registrar {
 
     struct Voter {
         bytes32[] allowedDomains;
@@ -21,7 +21,7 @@ contract Register {
     Ballot b;
     address owner;
 
-    function Register(bytes32[] domainList) {
+    function Registrar(bytes32[] domainList) {
         v.allowedDomains = domainList;
         owner = msg.sender;
     }
@@ -41,6 +41,10 @@ contract Register {
 
     function givePermission(bytes32 email) onlyOwner {
         v.createPerm[email] = 1;
+    }
+
+    function addDomains(bytes32 _domain) onlyOwner {
+        v.allowedDomains.push(_domain);
     }
 
     function domainCheck(bytes32 domain) constant returns (bool) {

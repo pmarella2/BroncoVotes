@@ -17,13 +17,13 @@ import {
 } from 'eth-lightwallet'
 
 
-import register_artifacts from '../../build/contracts/Register.json'
+import registrar_artifacts from '../../build/contracts/Registrar.json'
 import voting_artifacts from '../../build/contracts/Voting.json'
 import creator_artifacts from '../../build/contracts/Creator.json'
 
 
 
-var Register = contract(register_artifacts)
+var Registrar = contract(registrar_artifacts)
 var Voting = contract(voting_artifacts)
 var Creator = contract(creator_artifacts)
 var input1 = 1
@@ -53,7 +53,7 @@ $(document).ready(function() {
         window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
     }
 
-    Register.setProvider(web3.currentProvider)
+    Registrar.setProvider(web3.currentProvider)
     Voting.setProvider(web3.currentProvider)
     Creator.setProvider(web3.currentProvider)
 
@@ -69,7 +69,7 @@ $(document).ready(function() {
 window.loadBallot = function() {
     ballotID = $("#ballotid").val()
 
-    Register.deployed().then(function(contract) {
+    Registrar.deployed().then(function(contract) {
         contract.getAddress.call(ballotID).then(function(v) {
             var votingAddress = v.toString();
             if (votingAddress == 0) {
@@ -101,7 +101,7 @@ window.registerToVote = function() {
 
     var domain = email.replace(/.*@/, "")
 
-    Register.deployed().then(function(contract) {
+    Registrar.deployed().then(function(contract) {
         contract.domainCheck.call(domain).then(function(v) {
             var domainValid = v.toString()
 
@@ -153,7 +153,7 @@ window.voteForCandidate = function(candidate) {
 
     var votesArray = []
 
-    Register.deployed().then(function(contract) {
+    Registrar.deployed().then(function(contract) {
         contract.checkVoter(email, {
             gas: 2500000,
             from: web3.eth.accounts[0]
@@ -300,7 +300,7 @@ function vote(i, candidateArray, email, votingAddress, votesArray) {
 window.ballotSetup = function() {
     let cemail = $("#cemail").val()
 
-    Register.deployed().then(function(contract) {
+    Registrar.deployed().then(function(contract) {
         contract.checkVoter.call(cemail).then(function(v) {
             var voterCheck = v.toString()
 
@@ -357,7 +357,7 @@ window.ballotSetup = function() {
 }
 
 function registerBallot(votingaddress, ballotid) {
-    Register.deployed().then(function(contract) {
+    Registrar.deployed().then(function(contract) {
         contract.setAddress(votingaddress, ballotid, {
             gas: 2500000,
             from: web3.eth.accounts[0]
