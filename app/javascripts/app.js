@@ -263,7 +263,8 @@ function verifyTimestamp(eadd1, i, candidateArray, email, votingAddress, votesAr
             if (timecheck == "false") {
                 contract.getTimelimit.call().then(function(v) {
                     var endtime = v.toString()
-                    endtime = endtime - 21600
+                    //Testnet is plus 7 hours, uncomment this line if testing on testnet
+                    //endtime = endtime - 21600
                     endtime = new Date(endtime * 1000)
                     getVotes(votingAddress)
                     //window.alert("Voting period for this ballot has ended on " +endtime)
@@ -323,9 +324,14 @@ window.ballotSetup = function() {
                     } else {
                         let date = $("#date").val()
                         var enddate = (Date.parse(date).getTime() / 1000)
-                        enddate += 107940
-                        //enddate += 76920
-                        //-21600 to get original end date
+                        let time = $("#time").val()
+                        //Testnet is plus 7 hours
+                        //-21600 to get original end date and time on testnet
+                        var timeArray = time.split(':')
+                        //Testnet is plus 7 hours, uncomment this line if testing on testnet
+                        //var seconds = ((timeArray[0]*60)*60) + (timeArray[1]*60) + 21600
+                        var seconds = ((timeArray[0]*60)*60) + (timeArray[1]*60)
+                        enddate += seconds
                         let ballottype = $("input[name=ballottype]:checked").val()
                         let title = $("#vtitle").val()
                         let choices = $("#choices").val()
@@ -439,7 +445,8 @@ function getVotes(votingAddress) {
                 if (convVote == 0) {
                     contract.getTimelimit.call().then(function(v) {
                         var endtime = v.toString()
-                        endtime = endtime - 21600
+                        //Testnet is plus 7 hours, uncomment this line if testing on testnet
+                        //endtime = endtime - 21600
                         endtime = new Date(endtime * 1000);
                         $("#msg").html("Results will be displayed once the voting period has ended (" + endtime + ")")
                         //window.alert("Results will be displayed once the voting period has ended (" + endtime + ")")
