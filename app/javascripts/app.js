@@ -69,6 +69,7 @@ $(document).ready(function() {
 window.loadBallot = function() {
     $("#candidate-rows tr").remove()
     ballotID = $("#ballotid").val()
+    candidates = {}
 
     Registrar.deployed().then(function(contract) {
         contract.getAddress.call(ballotID).then(function(v) {
