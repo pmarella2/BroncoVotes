@@ -67,6 +67,7 @@ $(document).ready(function() {
 //Load ballot using user input ballot ID
 
 window.loadBallot = function() {
+    $("#candidate-rows tr").remove()
     ballotID = $("#ballotid").val()
 
     Registrar.deployed().then(function(contract) {
