@@ -22,7 +22,6 @@ import voting_artifacts from '../../build/contracts/Voting.json'
 import creator_artifacts from '../../build/contracts/Creator.json'
 
 
-
 var Registrar = contract(registrar_artifacts)
 var Voting = contract(voting_artifacts)
 var Creator = contract(creator_artifacts)
