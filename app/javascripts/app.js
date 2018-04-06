@@ -91,7 +91,7 @@ window.loadBallot = function() {
 //Register voter using ballot id and e-mail address
 
 window.registerToVote = function() {
-    var t0 = performance.now()
+    //var t0 = performance.now()
     let idNumber = $("#idnum").val()
     let email = $("#email").val()
     let permreq = $("input[name=permreq]:checked").val()
@@ -130,8 +130,8 @@ window.registerToVote = function() {
                 }).then(function() {
                     //$("#msg2").html("Account ready to vote!")
                     window.alert("Account ready to vote!")
-                    var t1 = performance.now()
-                    window.alert('It took' + (t1 - t0) + 'ms to finish')
+                    /*var t1 = performance.now()
+                    window.alert('It took' + (t1 - t0) + 'ms to finish')*/
                 })
             })
         })
