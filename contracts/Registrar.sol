@@ -1,4 +1,4 @@
-pragma solidity ^0.4.10;
+pragma solidity ^0.4.19;
 
 contract Registrar {
 
@@ -21,7 +21,7 @@ contract Registrar {
     Ballot b;
     address owner;
 
-    function Registrar(bytes32[] domainList) {
+    function Registrar(bytes32[] domainList) public {
         v.allowedDomains = domainList;
         owner = msg.sender;
     }
@@ -31,7 +31,7 @@ contract Registrar {
         _;
     }
 
-    function registerVoter(bytes32 email, uint16 idnum, bytes32 _domain, uint8 _permreq) {
+    function registerVoter(bytes32 email, uint16 idnum, bytes32 _domain, uint8 _permreq) public {
         if (domainCheck(_domain) == false) revert();
         v.voterID[email] = idnum;
         v.createPerm[email] = _permreq;
@@ -39,15 +39,15 @@ contract Registrar {
         v.voterEmail[idnum] = email;
     }
 
-    function givePermission(bytes32 email) onlyOwner {
+    function givePermission(bytes32 email) public onlyOwner {
         v.createPerm[email] = 1;
     }
 
-    function addDomains(bytes32 _domain) onlyOwner {
+    function addDomains(bytes32 _domain) public onlyOwner {
         v.allowedDomains.push(_domain);
     }
 
-    function domainCheck(bytes32 domain) constant returns (bool) {
+    function domainCheck(bytes32 domain) public view returns (bool) {
         for(uint i = 0; i < v.allowedDomains.length; i++) {
             if (v.allowedDomains[i] == domain) {
                 return true;
@@ -56,27 +56,27 @@ contract Registrar {
         return false;
     }
 
-    function checkReg(bytes32 email, uint16 idnum) constant returns (bool) {
+    function checkReg(bytes32 email, uint16 idnum) public view returns (bool) {
         if (v.voterID[email] == 0 && v.voterEmail[idnum] == 0) return true;
         else return false;
     }
 
-    function checkVoter(bytes32 email) constant returns (uint8) {
+    function checkVoter(bytes32 email) public view returns (uint8) {
         if (v.voterID[email] == 0) return 1;
         if (v.voterAddr[email] != msg.sender) return 2;
         else return 0;
     }
 
-    function setAddress(address _ballotAddr, uint32 _ballotID) {
+    function setAddress(address _ballotAddr, uint32 _ballotID) public {
         b.votingAddress[_ballotID] = _ballotAddr;
         b.ballotID[_ballotAddr] = _ballotID;
     }
 
-    function getAddress(uint32 _ballotID) constant returns (address) {
+    function getAddress(uint32 _ballotID) public view returns (address) {
         return b.votingAddress[_ballotID];
     }
 
-    function getPermission(bytes32 _email) constant returns (uint8) {
+    function getPermission(bytes32 _email) public view returns (uint8) {
         return v.createPerm[_email];
     }
 }
