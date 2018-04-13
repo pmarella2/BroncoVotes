@@ -9,6 +9,8 @@ contract Voting {
         uint32 timeLimit;
         string title;
         uint8 whitelist;
+        uint8 votesToWin;
+        uint8 ended;
     }
 
     struct Candidates {
@@ -36,13 +38,15 @@ contract Voting {
     bytes32 tempEmail;
     address owner;
 
-    function Voting(uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelist, address _owner) public {
+    function Voting(uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelist, uint8 _votesToWin, address _owner) public {
         b.timeLimit = _timeLimit;
         b.ballotType = _ballotType;
         b.voteLimit = _voteLimit;
         b.ballotId = _ballotId;
         b.title = _title;
         b.whitelist = _whitelist;
+        b.votesToWin = _votesToWin;
+        b.ended = 0;
 
         owner = _owner;
     }
@@ -79,6 +83,7 @@ contract Voting {
     function voteForCandidate(uint256[] _votes, bytes32 _email, bytes32[] _candidates) public {
         if (checkTimelimit() == false || checkVoteattempts() == false) revert();
         if (checkWhitelist() == true && checkifWhitelisted(_email) == false) revert();
+        if (b.ended == 1) revert();
         tempVotes = _votes;
         tempCandidates = _candidates;
         v.attemptedVotes[msg.sender] += 1;
@@ -140,6 +145,11 @@ contract Voting {
         else return true;
     }
 
+    function checkVotesToWin(bytes32 cHash) public view returns (uint256) {
+        if (validCandidate(cHash) == false) revert();
+        return c.votesReceived[cHash];
+    }
+
     function checkBallottype() private view returns (bool) {
         if (b.ballotType == 1) return false;
         else return true;
@@ -177,6 +187,22 @@ contract Voting {
     function getTitle() public view returns (string) {
         return b.title;
     }
+
+    function getBallotType() public view returns (uint8) {
+        return b.ballotType;
+    }
+
+    function getVotesToWin() public view returns (uint8) {
+        return b.votesToWin;
+    }
+
+    function getBallotStatus() public view returns (uint8) {
+        return b.ended;
+    }
+
+    function changeBallotStatus() public {
+        b.ended = 1;
+    }
 }
 
 //                         //
@@ -188,9 +214,9 @@ contract Creator {
     mapping (uint32 => address) contracts;
     address owner;
 
-    function createBallot(uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelisted) public {
+    function createBallot(uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string _title, uint8 _whitelisted, uint8 _votesToWin) public {
         owner = msg.sender;
-        address newContract = new Voting(_timeLimit, _ballotType, _voteLimit, _ballotId, _title, _whitelisted, owner);
+        address newContract = new Voting(_timeLimit, _ballotType, _voteLimit, _ballotId, _title, _whitelisted, _votesToWin, owner);
         contracts[_ballotId] = newContract;
     }
 
