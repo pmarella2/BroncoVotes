@@ -11,7 +11,7 @@
     <div class="col-sm-7">
         <h2 style="color:rgb(255,90,0)">Bronco</h2>
         <h2 style="color:rgb(0,0,255)">Votes</h2>
-        <h2 style="color:rgb(0,0,0)">: Alpha v1.1</h2>
+        <h2 style="color:rgb(0,0,0)">: Test Phase</h2>
         <br>
         <br>
         <br>
@@ -88,8 +88,6 @@
             <br>
             <input type="radio" style="width: 25px" name="ballottype" value="1"> <b>Election</b> (results are displayed after end date)
             <br>
-            <input type="radio" style="width: 25px" name="ballottype" value="2"> <b>First to X Votes</b> (results are displayed live)
-            <br>
             <br>
             <input type="text" id="vtitle" placeholder="Title of your ballot" style="width: 400px" />
             <br>
@@ -102,10 +100,7 @@
             <input type="text" id="votelimit" placeholder="Number of votes allowed per person" style="width: 400px" />
             <br>
             <br>
-            <input type="text" id="votestowin" placeholder="Number of votes to win (if First to X Votes option)" style="width: 400px" />
-            <br>
-            <br>
-            <b style="color:rgb(255,90,0)">Select voting restriction:</b>
+            <b style="color:rgb(255,90,0)">Select voting type:</b>
             <br>
             <input type="radio" style="width: 25px" name="whitelist" value="0"> <b>Non-Whitelist</b> (all e-mails with whitelisted domain are allowed to vote)
             <br>
@@ -114,7 +109,7 @@
             <br>
             <b style="color:rgb(0,0,255)">Seperate each e-mail address with a comma: </b>
             <br>
-            <input type="text" id="whitelisted" placeholder="Whitelisted e-mail addresses (if Whitelist option)" style="width: 400px" />
+            <input type="text" id="whitelisted" placeholder="Whitelisted e-mail addresses (if applicable)" style="width: 400px" />
             <br>
             <br>
             <form>

@@ -25,10 +25,9 @@ import creator_artifacts from '../../build/contracts/Creator.json'
 var Registrar = contract(registrar_artifacts)
 var Voting = contract(voting_artifacts)
 var Creator = contract(creator_artifacts)
-const input1 = 1
-const input2 = 0
+var input1 = 1
+var input2 = 0
 var timestamp
-var cVote
 
 var ballotID
 
@@ -174,99 +173,52 @@ window.voteForCandidate = function(candidate) {
 
             contract.getAddress.call(ballotID).then(function(v) {
                 var votingAddress = v.toString();
+
                 Voting.at(votingAddress).then(function(contract) {
-                    contract.getBallotType.call().then(function(v) {
-                        let bt = v.toString()
-                        contract.getVotesToWin.call().then(function(v) {
-                            let vtw = v.toString()
-                            contract.checkWhitelist.call().then(function(v) {
-                                let wc1 = v.toString()
-                                contract.checkifWhitelisted.call(email).then(function(v) {
-                                    let wc2 = v.toString()
-                                    if (wc1 == "true" && wc2 == "false") {
-                                        window.alert("You're are not authorized to vote on this ballot!")
-                                        //$("#msg").html("You're are not authorized to vote on this ballot!")
+                    contract.checkWhitelist.call().then(function(v) {
+                        let wc1 = v.toString()
+                        contract.checkifWhitelisted.call(email).then(function(v) {
+                            let wc2 = v.toString()
+                            if (wc1 == "true" && wc2 == "false") {
+                                window.alert("You're are not authorized to vote on this ballot!")
+                                //$("#msg").html("You're are not authorized to vote on this ballot!")
+                                throw new Error()
+                            } else {
+                                contract.validCandidate.call(cHash).then(function(v) {
+                                    var candValid = v.toString()
+
+                                    if (candValid == "false") {
+                                        window.alert("Invalid Candidate!")
+                                        //$("#msg").html("Invalid Candidate!")
                                         throw new Error()
-                                    } else {
-                                        contract.validCandidate.call(cHash).then(function(v) {
-                                            var candValid = v.toString()
+                                    }
+                                    contract.checkVoteattempts.call().then(function(v) {
+                                        var attempCheck = v.toString()
 
-                                            if (candValid == "false") {
-                                                window.alert("Invalid Candidate!")
-                                                //$("#msg").html("Invalid Candidate!")
-                                                throw new Error()
-                                            } else {
-                                                contract.checkVoteattempts.call().then(function(v) {
-                                                    var attempCheck = v.toString()
+                                        if (attempCheck == "false") {
+                                            window.alert("You have reached your voting limit for this ballot/poll!")
+                                            //$("#msg").html("You have reached your voting limit for this ballot/poll!")
+                                            throw new Error()
+                                        }
+                                        $("#msg").html("Your vote attempt has been submitted. Please wait for verification.")
+                                        $("#candidate").val("")
+                                        $("#e-mail").val("")
 
-                                                    if (attempCheck == "false") {
-                                                        window.alert("You have reached your voting limit for this ballot/poll!")
-                                                        //$("#msg").html("You have reached your voting limit for this ballot/poll!")
-                                                        throw new Error()
-                                                    } else {
-                                                        contract.getBallotStatus.call().then(function(v) {
-                                                            var cont = v.toString()
+                                        contract.candidateList.call(ballotID).then(function(candidateArray) {
+                                            for (let i = 0; i < candidateArray.length; i++) {
+                                                let hcand = (web3.toUtf8(candidateArray[i]))
+                                                let hcHash = sha3withsize(hcand, 32)
 
-                                                            if (cont == 1) {
-                                                                window.alert("This ballot has closed because one of the choices/candidates reached the required number of votes to win!")
-                                                                throw new Error()
-                                                            } else {
-                                                                //window.alert("got here!")
-                                                                //$("#msg").html("Your vote attempt has been submitted. Please wait for verification.")
-                                                                $("#candidate").val("")
-                                                                $("#e-mail").val("")
-                                                                if (bt == 2) {
-                                                                    contract.candidateList.call(ballotID).then(function(candidateArray) {
-                                                                        for (let i = 0; i < candidateArray.length; i++) {
-                                                                            let hcand = (web3.toUtf8(candidateArray[i]))
-                                                                            let hcHash = sha3withsize(hcand, 32)
-
-                                                                            contract.totalVotesFor.call(hcHash).then(function(v) {
-                                                                                var convVote = v.toString()
-                                                                                convVote = scientificToDecimal(convVote)
-                                                                                //window.alert("got here!")
-
-                                                                                verifyDecrypt(convVote).done(function(cv) {
-                                                                                    $("#msg").html("Voting c " + cv)
-                                                                                    if (vtw == cv) {
-                                                                                        cont = 1
-                                                                                        contract.changeBallotStatus({
-                                                                                            gas: 100000,
-                                                                                            from: web3.eth.accounts[0]
-                                                                                        }).then(function() {
-                                                                                            window.alert("This ballot has closed because one of the choices/candidates reached the required number of votes to win!")
-                                                                                            throw new Error()
-                                                                                        })
-                                                                                    }
-                                                                                })
-                                                                            })
-                                                                        }
-                                                                    })
-                                                                }
-                                                                if (cont == 0) {
-                                                                    contract.candidateList.call(ballotID).then(function(candidateArray) {
-                                                                        for (let i = 0; i < candidateArray.length; i++) {
-                                                                            let hcand = (web3.toUtf8(candidateArray[i]))
-                                                                            let hcHash = sha3withsize(hcand, 32)
-
-                                                                            if (hcHash == cHash) {
-                                                                                encrypt(hcHash, input1, i, candidateArray, email, votingAddress, votesArray)
-                                                                            } else {
-                                                                                encrypt(hcHash, input2, i, candidateArray, email, votingAddress, votesArray)
-                                                                            }
-                                                                        }
-                                                                    })
-                                                                }
-
-                                                            }
-                                                        })
-                                                    }
-                                                })
+                                                if (hcHash == cHash) {
+                                                    encrypt(hcHash, input1, i, candidateArray, email, votingAddress, votesArray)
+                                                } else {
+                                                    encrypt(hcHash, input2, i, candidateArray, email, votingAddress, votesArray)
+                                                }
                                             }
                                         })
-                                    }
+                                    })
                                 })
-                            })
+                            }
                         })
                     })
                 })
@@ -300,12 +252,12 @@ function add(eoutput1, einput1, i, candidateArray, email, votingAddress, votesAr
         type: "GET",
         url: "http://localhost:3000/add/" + eoutput1 + "/" + einput1,
         success: function(eadd1) {
-            verifyBallot(eadd1, i, candidateArray, email, votingAddress, votesArray)
+            verifyTimestamp(eadd1, i, candidateArray, email, votingAddress, votesArray)
         }
     })
 }
 
-function verifyBallot(eadd1, i, candidateArray, email, votingAddress, votesArray) {
+function verifyTimestamp(eadd1, i, candidateArray, email, votingAddress, votesArray) {
     Voting.at(votingAddress).then(function(contract) {
         contract.checkTimelimit.call().then(function(v) {
             var timecheck = v.toString()
@@ -379,25 +331,20 @@ window.ballotSetup = function() {
                         var timeArray = time.split(':')
                         //Testnet is plus 7 hours, uncomment this line if testing on testnet
                         //var seconds = ((timeArray[0]*60)*60) + (timeArray[1]*60) + 21600
-                        var seconds = ((timeArray[0] * 60) * 60) + (timeArray[1] * 60)
+                        var seconds = ((timeArray[0]*60)*60) + (timeArray[1]*60)
                         enddate += seconds
                         let ballottype = $("input[name=ballottype]:checked").val()
                         let title = $("#vtitle").val()
                         let choices = $("#choices").val()
                         var choicesArray = choices.split(/\s*,\s*/)
                         let votelimit = $("#votelimit").val()
-                        let votestowin = $("#votestowin").val()
                         let whitelist = $("input[name=whitelist]:checked").val()
                         let whitelisted = $("#whitelisted").val()
                         var whitelistedArray = whitelisted.split(/\s*,\s*/)
                         let ballotid = Math.floor(Math.random() * 4294967295)
 
-                        if (votestowin == 0) {
-                            votestowin = 99999
-                        }
-
                         Creator.deployed().then(function(contract) {
-                            contract.createBallot(enddate, ballottype, votelimit, ballotid, title, whitelist, votestowin, {
+                            contract.createBallot(enddate, ballottype, votelimit, ballotid, title, whitelist, {
                                 gas: 2500000,
                                 from: web3.eth.accounts[0]
                             }).then(function() {
@@ -496,7 +443,6 @@ function getVotes(votingAddress) {
             contract.totalVotesFor.call(cvHash).then(function(v) {
 
                 var convVote = v.toString()
-
                 if (convVote == 0) {
                     contract.getTimelimit.call().then(function(v) {
                         var endtime = v.toString()
@@ -523,16 +469,5 @@ function decrypt(convVote, name) {
             var voteNum = eoutput
             $("#" + candidates[name]).html(voteNum.toString())
         }
-    })
-}
-
-function verifyDecrypt(convVote) {
-    return $.ajax({
-        type: "GET",
-        async: false,
-        url: "http://localhost:3000/decrypt/" + convVote,
-        /*success: function(eoutput) {
-            var voteNum = eoutput
-        }*/
     })
 }
