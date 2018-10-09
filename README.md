@@ -13,7 +13,7 @@ contracts to achieve voter administration and auditable voting records. In addit
 cryptographic techniques, including homomorphic encryption, to promote voter privacy. Our implementation
 was deployed on Ethereum’s Testnet to demonstrate usability, scalability, and efficiency.
 
-## **Requirements for compiling and interacting with Voting DApp:**
+## **Requirements for compiling and interacting with the Voting DApp:**
 
 ### **Operating System**:
 Ubuntu 16.xx or higher (make sure to update your OS)
@@ -65,7 +65,7 @@ npm run dev
 
 
 ## **Troubleshoothing:**
-Open an issue if there are any issues with compiling and running the DApp
+Open an issue if there are any problems with compiling and running the DApp
 
 ## **Acknowledgements:**
 I want to thank NSF and the ISPM research lab for providing the grant and resources to conduct this research project. I would also like to extend my thanks to Mahesh Murthy and Truffle team for providing the structure/tools for smart contract and web DApp development.
