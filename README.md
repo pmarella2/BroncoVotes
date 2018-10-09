@@ -63,7 +63,6 @@ npm run dev
 ### **Interacting with the voting DApp**:
 1. You can now interact with the DApp by navigating to *localhost:8080* in your choice of browser
 
-
 ## **Troubleshoothing:**
 Open an issue if there are any problems with compiling and running the DApp
 
